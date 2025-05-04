@@ -1,0 +1,9 @@
+apiVersion: ops.example.com/v1
+kind: PodMover
+metadata:
+  labels:
+    app.kubernetes.io/name: pod-mover-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: podmover-sample
+spec:
+  # TODO(user): Add fields here

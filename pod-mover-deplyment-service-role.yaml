@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-mover-operator
+  namespace: testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-mover-operator
+  template:
+    metadata:
+      labels:
+        app: pod-mover-operator
+    spec:
+      serviceAccountName: pod-mover-operator-sa
+      containers:
+        - name: pod-mover-operator
+          image: sudhirjula/pod-mover-operator:latest # Update with your actual image
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              value: "testing,quality,default"
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "100m"
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-mover-operator-sa
+  namespace: testing
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-mover-operator-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "patch", "update", "delete", "create"]  # Added "create"
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]  # Added namespace access
+  - apiGroups: ["ops.example.com"]
+    resources: ["podmovers"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["ops.example.com"]
+    resources: ["podmovers/status"]
+    verbs: ["get", "patch", "update"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pod-mover-operator-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: pod-mover-operator-sa
+    namespace: testing
+roleRef:
+  kind: ClusterRole
+  name: pod-mover-operator-role
+  apiGroup: rbac.authorization.k8s.io

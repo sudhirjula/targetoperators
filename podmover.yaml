@@ -1,0 +1,9 @@
+apiVersion: ops.example.com/v1
+kind: PodMover
+metadata:
+  name: pod-mover-example
+  namespace: testing
+spec:
+  podSelector: "selector=sample-pod"  # Matches pod labels correctly
+  sourceNamespace: testing
+  targetNamespace: quality
